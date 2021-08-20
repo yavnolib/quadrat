@@ -3,6 +3,7 @@
 #include <locale.h>     // setlocale ( LC_ALL, "");
 #include <ctype.h>      // isdigit (c)
 #include <string.h>     // strlen (a)
+#include "equation.h"
 
 int main(int argc, char argv[])
 {
