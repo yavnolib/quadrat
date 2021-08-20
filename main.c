@@ -97,7 +97,6 @@ int main()
                 a = ABS(a);
                 //a = a / ( c / reduce_fraction (c, a) );
                 //c = reduce_fraction (c, a);
-                printf("\n %d %d",c,a);
                 if (a == 1){
                     printf ( "\n Ответ: x = +-sqrt(%d)", c );
                 }
@@ -110,7 +109,6 @@ int main()
                 a = ABS(a);
                 //a = a / ( c / reduce_fraction (c, a) );
                 //c = reduce_fraction (c, a);
-                printf("\n %d %d",c,a);
                 if (a == 1){
                     printf ( "\n Ответ: x = +-i*sqrt(%d)", c );
                 }
