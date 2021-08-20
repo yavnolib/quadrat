@@ -11,5 +11,10 @@ size_t pow_ch(char str[], size_t length);        // Индекс значка с
 int get_ratio(char str[], size_t length, size_t left_index, size_t right_index); // Получить числовое значение коэффициентов a, b, c
 int gcd(int a, int b);
 int reduce_fraction(int a, int b);
+void new_reduce(int* a, int* b);
+char* remove_white_spaces(char* str);
+int is_equal(char* str);
+int RemoveEq(char* str);
+void str_analys(char* str);
 int is_sqr(int n);
 int int_sqrt(int n);
