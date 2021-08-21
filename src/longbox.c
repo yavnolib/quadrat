@@ -13,15 +13,17 @@
     */
     /*
     одна буква х
-    (1*) ax^2=0 => x=0
-    (2*) ax^2+c=0 =>
+    (01*) bx+c=0        //WITHOUT_A
+    (02*) bx=0          // WITHOUT A_C
+    (1*) ax^2=0 => x=0  // WITHOUT B_C
+    (2*) ax^2+c=0 =>    // WITHOUT B
                     if (c>0 and a<0) or (c<0 and a>0):
                         x = +-sqrt( |c|/|a| )
                     else
                         x = +-i*sqrt( |c|/|a| )
     две буквы х
-    (3*) ax^2+bx=0 => x(ax+b)=0 => x=0, x=-b/a
-    (4*) ax^2+bx+c=0 =>
+    (3*) ax^2+bx=0 => x(ax+b)=0 => x=0, x=-b/a WITHOUT C
+    (4*) ax^2+bx+c=0 => FULL
         D=b^2-4*a*c
         switch(D):
             D=0 => x=-b/2a
@@ -171,6 +173,12 @@ void str_analys(char* str) {
         remove_white_spaces(str);
         int len = RemoveEq(str);
         int c_x = count_x(str, len);
+        //sscanf("hello 1 2 3 4 5", "%s%d", str, &i);
+        //printf("%s %d", str, i);
+        // «hello 1»
+        // parse
+        // str: ax^2+bx+c
+        // sscanf(str,"")
         int a, b, c; // коэффициенты
         size_t x_pos, first_x_pos, last_x_pos, power_pos; // x_pos при одном иксе в строке, power_pos - индекс значка ^
         switch (c_x) {
@@ -226,11 +234,11 @@ void str_analys(char* str) {
                 }
             }
             else if (power_pos == (len - 2)) {
-                // то (1*)
+                // то (1*) WITHOUT_B_C
                 printf("\nЕдинственное решение: x = 0");
             }
             else {
-                // то (2*)
+                // то (2*) WITHOUT_B
                 if (x_pos == 0)
                     a = 1;
                 else {
@@ -317,7 +325,7 @@ void str_analys(char* str) {
             }
 
             if (last_x_pos == (len - 1)) {
-                // то (3*)
+                // то (3*) WITHOUT_C
                 // -b/a
                 if (((a > 0) && (b < 0)) || ((a < 0) && (b > 0))) {  // если знаки разные |b|/|a|
                     b = ABS(b);
@@ -343,7 +351,7 @@ void str_analys(char* str) {
                 }
             }
             else {
-                // то (4*)
+                // то (4*) FULL
                 // поиск значения с
                 if (str[last_x_pos + 1] == '-') {
                     c = get_opposite(get_ratio(str, len, last_x_pos + 2, len - 1));
