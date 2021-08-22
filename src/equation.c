@@ -27,8 +27,9 @@ void equation_input(struct Equation* eq) {
     while (!(isfinite(eq->a) && isfinite(eq->b) && isfinite(eq->c))) {
         printf("Введите коэффициенты квадратного уравнения ax^2+bx+c=0 в соответствующем порядке.\n Дробную часть отделите запятой. \n");
         scanf("%f %f %f", &(eq->a), &(eq->b), &(eq->c));
+        fseek(stdin, 0, SEEK_END);
         if (!(isfinite(eq->a) && isfinite(eq->b) && isfinite(eq->c))) {
-            fprintf(stderr, "Please re-enter the coefficients\n");
+            fprintf(stderr, "\n\t\tWrong input\n\n");
             fflush(stdin);
         }
     }
@@ -127,6 +128,8 @@ void solve_eq(struct Equation* eq) {
     float b = eq->b;
     float c = eq->c;
     float D = b * b - 4 * a * c;
+    float x1 = 0.0;
+    float x2 = 0.0;
     switch (eq->type)
     {
     case WITHOUT_A:
@@ -171,8 +174,18 @@ void solve_eq(struct Equation* eq) {
         if (D > 0) {
             eq->is_complex = REAL;
             eq->root = TWO_ROOTS;
-            eq->x1 = ((-1.0 * b) - sqrt(D)) / (2.0 * a);
-            eq->x2 = ((-1.0 * b) + sqrt(D)) / (2.0 * a);
+            
+            x1 = ((-1.0 * b) - sqrt(D)) / (2.0 * a);
+            x2 = ((-1.0 * b) + sqrt(D)) / (2.0 * a);
+
+            if (x1 < x2) {
+                eq->x1 = x1;
+                eq->x2 = x2;
+            }
+            else {
+                eq->x1 = x2;
+                eq->x2 = x1;
+            }
         }
         else if (D < 0) {
             eq->is_complex = COMPLEX;
@@ -196,7 +209,7 @@ void solve_eq(struct Equation* eq) {
 //======================================================================
 void print_complex_solution(struct Equation* eq) {
     assert(eq != NULL);
-    float D_sqrt = sqrtf(fabs((eq->b) * (eq->b) - 4 * (eq->a) * (eq->c)));
+    float D_sqrt = sqrtf(fabs((eq->b) * (eq->b) - 4.0 * (eq->a) * (eq->c)));
 
     switch (eq->type)
     {
