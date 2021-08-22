@@ -93,4 +93,3 @@ void print_roots(struct Equation* eq);
 //! A function that combines inputting an equation, getting its type, and outputting an equation
 /*! \param equation - equation to be introduced. */
 void enter_equation(struct Equation* eq);
-
