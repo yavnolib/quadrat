@@ -76,22 +76,47 @@ void print_eq_form(struct Equation* eq) {
     switch (eq->type)
     {
     case WITHOUT_A:
-        printf("%.2f * x + %.2f = 0\n", eq->b, eq->c);
+        if((eq->c)>0)
+            printf("%.2f * x + %.2f = 0\n", eq->b, eq->c);
+        else
+            printf("%.2f * x - %.2f = 0\n", eq->b, fabs(eq->c));
         break;
     case WITHOUT_A_C:
         printf("%.2f * x = 0\n", eq->b);
         break;
     case WITHOUT_B:
-        printf("%.2f * x^2 + %.2f = 0\n", eq->a, eq->c);
+        if((eq->c)>0)
+            printf("%.2f * x^2 + %.2f = 0\n", eq->a, eq->c);
+        else
+            printf("%.2f * x^2 - %.2f = 0\n", eq->a, fabs(eq->c));
         break;
     case WITHOUT_B_C:
         printf("%.2f * x^2 = 0\n", eq->a);
         break;
     case WITHOUT_C:
-        printf("%.2f * x^2 + %.2f * x = 0\n", eq->a, eq->b);
+        if((eq->b)>0)
+            printf("%.2f * x^2 + %.2f * x = 0\n", eq->a, eq->b);
+        else
+            printf("%.2f * x^2 - %.2f * x = 0\n", eq->a, fabs(eq->b));
         break;
     case FULL:
-        printf("%.2f * x^2 + %.2f * x + %.2f = 0\n", eq->a, eq->b, eq->c);
+        if ((eq->b) > 0) {
+            if ((eq->c) > 0) {
+                printf("%.2f * x^2 + %.2f * x + %.2f = 0\n", eq->a, eq->b, eq->c);
+            }
+            else {
+                printf("%.2f * x^2 + %.2f * x - %.2f = 0\n", eq->a, eq->b, fabs(eq->c));
+            }
+        }
+        else {
+            if ((eq->c) > 0) {
+                printf("%.2f * x^2 - %.2f * x + %.2f = 0\n", eq->a, fabs(eq->b), eq->c);
+            }
+            else {
+                printf("%.2f * x^2 - %.2f * x - %.2f = 0\n", eq->a, fabs(eq->b), fabs(eq->c));
+            }
+        }
+        
         break;
     default:
         assert(0);
