@@ -21,12 +21,17 @@ void equation_initialize(struct Equation* eq) {
 
 //======================================================================
 void equation_input(struct Equation* eq) {
-
+    char answer = 0;
+    
     assert(eq != NULL);
-    
-    printf("Введите коэффициенты квадратного уравнения ax^2+bx+c=0 в соответствующем порядке.\n Дробную часть отделите запятой. \n");
-    scanf("%f %f %f", &(eq->a), &(eq->b), &(eq->c));
-    
+    while (!(isfinite(eq->a) && isfinite(eq->b) && isfinite(eq->c))) {
+        printf("Введите коэффициенты квадратного уравнения ax^2+bx+c=0 в соответствующем порядке.\n Дробную часть отделите запятой. \n");
+        scanf("%f %f %f", &(eq->a), &(eq->b), &(eq->c));
+        if (!(isfinite(eq->a) && isfinite(eq->b) && isfinite(eq->c))) {
+            fprintf(stderr, "Please re-enter the coefficients\n");
+            fflush(stdin);
+        }
+    }
     
     assert(isfinite(eq->a));
     assert(isfinite(eq->b));
@@ -191,7 +196,7 @@ void solve_eq(struct Equation* eq) {
 //======================================================================
 void print_complex_solution(struct Equation* eq) {
     assert(eq != NULL);
-    float D_sqrt = sqrtf((eq->b) * (eq->b) - 4 * (eq->a) * (eq->c));
+    float D_sqrt = sqrtf(fabs((eq->b) * (eq->b) - 4 * (eq->a) * (eq->c)));
 
     switch (eq->type)
     {
