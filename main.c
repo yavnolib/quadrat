@@ -16,8 +16,10 @@ int main(int argc, char* argv[])
     //str_analys(str);
     //return 0;
     struct Equation quadro;
+    equation_initialize(&quadro);
     enter_equation(&quadro);
-    solve_and_print(&quadro);
+    solve_eq(&quadro);
+    print_roots(&quadro);
     return 0;
 }
 
