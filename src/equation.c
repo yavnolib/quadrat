@@ -4,6 +4,8 @@
 #include <math.h>
 #include <assert.h>
 
+
+//======================================================================
 void equation_initialize(struct Equation* eq) {
 
     assert(eq != NULL);
@@ -12,10 +14,12 @@ void equation_initialize(struct Equation* eq) {
     eq->c = NAN;
     eq->x1 = NAN;
     eq->x2 = NAN;
-    eq->type = NAN;
-    eq->is_complex = NAN;
-    eq->root = NAN;
+    eq->type = 0;
+    eq->is_complex = 0;
+    eq->root = 0;
 }
+
+//======================================================================
 void equation_input(struct Equation* eq) {
 
     assert(eq != NULL);
@@ -30,6 +34,8 @@ void equation_input(struct Equation* eq) {
     
     assert(!(((eq->a) == 0) && ((eq->b) == 0) && ((eq->c) == 0)));
 }
+
+//======================================================================
 void get_eq_type(struct Equation* eq) {
     assert(eq != NULL);
     
@@ -54,6 +60,8 @@ void get_eq_type(struct Equation* eq) {
         eq->type = FULL;
 
 }
+
+//======================================================================
 void print_eq_form(struct Equation* eq) {
     assert(eq != NULL);
 
@@ -84,6 +92,9 @@ void print_eq_form(struct Equation* eq) {
         break;
     }
 }
+
+
+//======================================================================
 void solve_eq(struct Equation* eq) {
     /*
         одна буква х
@@ -107,57 +118,68 @@ void solve_eq(struct Equation* eq) {
                        x2 = ( -b + i*sqrt(|D|) )/2a
     */
     assert(eq != NULL);
-    float D = (eq->b) * (eq->b) - 4 * (eq->a) * (eq->c);
+    float a = eq->a;
+    float b = eq->b;
+    float c = eq->c;
+    float D = b * b - 4 * a * c;
     switch (eq->type)
     {
     case WITHOUT_A:
         eq->is_complex = REAL;
         eq->root = ONE_ROOT;
-        eq->x1 = (-1.0*(eq->c))/(eq->b);
+        eq->x1 = (-1.0 * c) / b;
+        eq->x2 = EMPTY_R;
         break;
     case WITHOUT_A_C:
         eq->is_complex = REAL;
         eq->root = ONE_ROOT;
         eq->x1 = 0;
+        eq->x2 = EMPTY_R;
         break;
     case WITHOUT_B:
-        if ((((eq->c) > 0) && ((eq->a) < 0)) || (((eq->c) < 0) && ((eq->a) > 0))) {
+        if (D>0) {
             eq->is_complex = REAL;
             eq->root = TWO_ROOTS;
-            eq->x1 = sqrtf(fabs(eq->c) / fabs(eq->a));
-            eq->x2 = -1.0 * sqrtf(fabs(eq->c) / fabs(eq->a));
+            eq->x1 = sqrtf(fabs(c) / fabs(a));
+            eq->x2 = -1.0 * sqrtf(fabs(c) / fabs(a));
         }
         else {
             eq->is_complex = COMPLEX;
             eq->root = TWO_COMP;
+            eq->x1 = COMPLEX_R;
+            eq->x2 = COMPLEX_R;
         }
         break;
     case WITHOUT_B_C:
         eq->is_complex = REAL;
         eq->root = ONE_ROOT;
         eq->x1 = 0;
+        eq->x2 = EMPTY_R;
         break;
     case WITHOUT_C:
         eq->is_complex = REAL;
         eq->root = TWO_ROOTS;
         eq->x1 = 0;
-        eq->x2 = (-1.0 * (eq->b)) / (eq->a);
+        eq->x2 = (-1.0 * b) / a;
         break;
     case FULL:
         if (D > 0) {
             eq->is_complex = REAL;
             eq->root = TWO_ROOTS;
-            eq->x1 = ((-1.0 * (eq->b)) - sqrt(D)) / (2.0 * (eq->a));
-            eq->x2 = ((-1.0 * (eq->b)) + sqrt(D)) / (2.0 * (eq->a));
+            eq->x1 = ((-1.0 * b) - sqrt(D)) / (2.0 * a);
+            eq->x2 = ((-1.0 * b) + sqrt(D)) / (2.0 * a);
         }
         else if (D < 0) {
             eq->is_complex = COMPLEX;
             eq->root = TWO_COMP;
+            eq->x1 = COMPLEX_R;
+            eq->x2 = COMPLEX_R;
         }
         else {
             eq->is_complex = REAL;
             eq->root = ONE_ROOT;
-            eq->x1 = (-1.0 * (eq->b)) / (2.0 * (eq->a));
+            eq->x1 = (-1.0 * b) / (2.0 * a);
+            eq->x2 = EMPTY_R;
         }
         break;
     default:
@@ -165,6 +187,8 @@ void solve_eq(struct Equation* eq) {
         break;
     }
 }
+
+//======================================================================
 void print_complex_solution(struct Equation* eq) {
     assert(eq != NULL);
     float D_sqrt = sqrtf((eq->b) * (eq->b) - 4 * (eq->a) * (eq->c));
@@ -192,6 +216,8 @@ void print_complex_solution(struct Equation* eq) {
         break;
     }
 }
+
+//======================================================================
 void print_roots(struct Equation* eq) {
     assert(eq != NULL);
     if ((eq->is_complex) == COMPLEX)
@@ -210,15 +236,12 @@ void print_roots(struct Equation* eq) {
         }
     }
 }
+
+//======================================================================
 void enter_equation(struct Equation* eq) {
     assert(eq != NULL);
-    equation_initialize(eq);
+    
     equation_input(eq);
     get_eq_type(eq);
     print_eq_form(eq);
-}
-void solve_and_print(struct Equation* eq) {
-    assert(eq != NULL);
-    solve_eq(eq);
-    print_roots(eq);
 }
