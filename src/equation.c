@@ -288,3 +288,23 @@ void enter_equation(struct Equation* eq) {
     get_eq_type(eq);
     print_eq_form(eq);
 }
+
+//======================================================================
+int want_again() {
+    char y_or_n = 0;
+    printf("\nХотите ввести еще одно уравнение? y/n: ");
+    scanf("%c", &y_or_n);
+    assert(!isfinite(y_or_n));
+    if ((y_or_n == 'y') || (y_or_n == 'Y')) {
+        fseek(stdin, 0, SEEK_END);
+        return 1;
+    }
+    else if ((y_or_n == 'n') || (y_or_n == 'N')) {
+        fseek(stdin, 0, SEEK_END);
+        return 0;
+    }
+    else {
+        printf("\nВведите y , чтобы продолжить или n , чтобы прекратить выполнение программы");
+        want_again();
+    }
+}
