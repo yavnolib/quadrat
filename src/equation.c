@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "equation.h"
+#include "float.h"
 #include <limits.h>
 #include <math.h>
 #include <assert.h>
@@ -196,7 +197,7 @@ void solve_eq(struct Equation* eq) {
         eq->x2 = (-1.0 * b) / a;
         break;
     case FULL:
-        if (D > 0) {
+        if (D > FLT_MIN) {
             eq->is_complex = REAL;
             eq->root = TWO_ROOTS;
             
@@ -212,7 +213,7 @@ void solve_eq(struct Equation* eq) {
                 eq->x2 = x1;
             }
         }
-        else if (D < 0) {
+        else if (D < (-1.0* FLT_MIN) ) {
             eq->is_complex = COMPLEX;
             eq->root = TWO_COMP;
             eq->x1 = COMPLEX_R;
