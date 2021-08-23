@@ -22,10 +22,12 @@ int main(int argc, char* argv[])
 
     //return 0;
     struct Equation quadro;
-    equation_initialize(&quadro);
-    enter_equation(&quadro);
-    solve_eq(&quadro);
-    print_roots(&quadro);
+    do {
+        equation_initialize(&quadro);
+        enter_equation(&quadro);
+        solve_eq(&quadro);
+        print_roots(&quadro);
+    } while (want_again());
     return 0;
 }
 
