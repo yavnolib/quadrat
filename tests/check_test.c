@@ -34,6 +34,14 @@ void init_test(struct Equation* inp, struct Equation* out, float a, float b, flo
 	
 }
 
+int is_equalf(float a, float b) {
+	float first = roundf(a * 100.0) / 100.0;
+	float second = roundf(b * 100.0) / 100.0;
+	if (first==second)
+		return 1;
+	else
+		return 0;
+}
 int check_ans(struct Equation* inp, struct Equation* out) {
 	assert(inp != NULL);
 	assert(out != NULL);
@@ -55,21 +63,13 @@ int check_ans(struct Equation* inp, struct Equation* out) {
 					return 0;
 			}
 			else if ((out->root) == ONE_ROOT) {
-				float inp_round_x1 = roundf((inp->x1) * 100.0) / 100.0;
-				float out_round_x1 = roundf((out->x1) * 100.0) / 100.0;
-				if ((inp_round_x1 == out_round_x1)&&((inp->x2)==(out->x2)))
+				if (is_equalf ( (inp->x1), (out->x1) ) && ( (inp->x2) == (out->x2) ))
 					return 1;
 				else
 					return 0;
 			}
 			else if((out->root) == TWO_ROOTS){
-				float inp_round_x1 = roundf((inp->x1) * 100.0) / 100.0;
-				float out_round_x1 = roundf((out->x1) * 100.0) / 100.0;
-
-				float inp_round_x2 = roundf((inp->x2) * 100.0) / 100.0;
-				float out_round_x2 = roundf((out->x2) * 100.0) / 100.0;
-
-				if ((inp_round_x1 == out_round_x1) && (inp_round_x2 == out_round_x2)) {
+				if (is_equalf( (inp->x1), (out->x1) ) && is_equalf( (inp->x2), (out->x2))) {
 					return 1;
 				}
 				else
