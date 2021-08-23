@@ -47,9 +47,7 @@ int check_ans(struct Equation* inp, struct Equation* out) {
 	assert(out != NULL);
 
 	print_eq_form(out);
-	
 
-	// roundf(val * 100) / 100
 	if ((inp->is_complex) == (out->is_complex)) {
 		if ((inp->root) == (out->root)) {
 			if ((out->root) == TWO_COMP) {
