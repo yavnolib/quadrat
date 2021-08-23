@@ -6,4 +6,6 @@ void init_test(struct Equation* inp, struct Equation* out, float a, float b, flo
 
 int check_ans(struct Equation* inp, struct Equation* out);
 
+int is_equalf(float a, float b);
+
 void start_test(struct Equation* input, struct Equation* output);
