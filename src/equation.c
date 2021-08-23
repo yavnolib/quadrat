@@ -294,13 +294,11 @@ int want_again() {
     char y_or_n = 0;
     printf("\nХотите ввести еще одно уравнение? y/n: ");
     scanf("%c", &y_or_n);
-    assert(!isfinite(y_or_n));
+    fseek(stdin, 0, SEEK_END);
     if ((y_or_n == 'y') || (y_or_n == 'Y')) {
-        fseek(stdin, 0, SEEK_END);
         return 1;
     }
     else if ((y_or_n == 'n') || (y_or_n == 'N')) {
-        fseek(stdin, 0, SEEK_END);
         return 0;
     }
     else {
