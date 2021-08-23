@@ -6,7 +6,10 @@
 #include "assert.h"
 
 
-void init_test(struct Equation* inp, struct Equation* out, float a, float b, float c, int type, int is_complex, int root, float x1, float x2) {
+void init_test(struct Equation* inp, struct Equation* out, 
+			   float a, float b, float c, int type, 
+			   int is_complex, int root, float x1, float x2) {
+
 	assert(inp != NULL);
 	assert(out != NULL);
 	
@@ -20,72 +23,72 @@ void init_test(struct Equation* inp, struct Equation* out, float a, float b, flo
 	out->c = c;
 
 	inp->type = type;
+	out->type = type;
+
 	inp->is_complex = is_complex;
 	inp->root = root;
 	inp->x1 = x1;
 	inp->x2 = x2;
 
-	out->type = type;
+	
 	out->is_complex = 0;
 	out->root = 0;
 	out->x1 = NAN;
 	out->x2 = NAN;
-
-	
 }
 
-int is_equalf(float a, float b) {
-	float first = roundf(a * 100.0) / 100.0;
-	float second = roundf(b * 100.0) / 100.0;
-	if (first==second)
-		return 1;
-	else
-		return 0;
-}
 int check_ans(struct Equation* inp, struct Equation* out) {
 	assert(inp != NULL);
 	assert(out != NULL);
 
+	printf("\nТестовое уравнение:");
 	print_eq_form(out);
+	
+	if ((inp->is_complex == out->is_complex) && (inp->root == out->root)) {
 
-	if ((inp->is_complex) == (out->is_complex)) {
-		if ((inp->root) == (out->root)) {
-			if ((out->root) == TWO_COMP) {
-				if (inp->x1 == COMPLEX_R) {
-					return 1;
-				}
-				else if (inp->x2 == COMPLEX_R) {
-					return 1;
-				}
-				else
-					return 0;
-			}
-			else if ((out->root) == ONE_ROOT) {
-				if (is_equalf ( (inp->x1), (out->x1) ) && ( (inp->x2) == (out->x2) ))
-					return 1;
-				else
-					return 0;
-			}
-			else if((out->root) == TWO_ROOTS){
-				if (is_equalf( (inp->x1), (out->x1) ) && is_equalf( (inp->x2), (out->x2))) {
-					return 1;
-				}
-				else
-					return 0;
-			}
-			else {
-				return 0;
-			}
+		switch (inp->root)
+		{
+		case TWO_COMP:
 
-		}
-		else {
-			return 0;
+			if (is_equali(inp->x1, out->x1) && is_equali(inp->x2, out->x2))
+				return 1;
+
+			break;
+
+		case ONE_ROOT:
+
+			if (is_equalf((inp->x1), (out->x1)) && is_equali(inp->x2,out->x2))
+				return 1;
+
+
+			break;
+
+		case TWO_ROOTS:
+
+			if (is_equalf((inp->x1), (out->x1)) && is_equalf((inp->x2), (out->x2)))
+				return 1;
+
+			break;
+
+		case NO_ROOTS_R:
+
+			if (is_equali(inp->x1, out->x1) && is_equali(inp->x2, out->x2))
+				return 1;
+
+			break;
+
+		default:
+
+			fprintf(stderr, "\n\t\tUNKNOWN ERROR\n\n");
+ 
+			break;
 		}
 	}
-	else {
-		return 0;
-	}
+
+	return 0;
+
 }
+
 void start_test(struct Equation* input, struct Equation* output) {
 	
 	printf("Tests are running...\n");
@@ -93,38 +96,50 @@ void start_test(struct Equation* input, struct Equation* output) {
 
 	// format init_test(&input, &output, 5.48, 6.48, 0.0, WITHOUT_C, REAL, TWO_ROOTS, 0, -1.18248);
 	// a, b, c, TYPE, COMPLEX, ROOT, x1, x2
-	float checkers[8][8] =
+	float checkers[TEST_COUNT][TEST_ARGS] =
 	{
-		{5.48, 6.48,  0.0,   WITHOUT_C,    REAL, TWO_ROOTS,        0,   -1.18248},
-		{1.0 ,  0.0,  0.0, WITHOUT_B_C,    REAL,  ONE_ROOT,        0,    EMPTY_R},
-		{48.8, 58.2,  1.0,        FULL,    REAL, TWO_ROOTS, -1.17519, -0.0174371},
-		{-7.0, 49.0,  1.0,        FULL,    REAL, TWO_ROOTS, -0.020349,    7.0203},
-		{ 0.0, 49.0,  1.0,   WITHOUT_A,    REAL,  ONE_ROOT, -0.020408,   EMPTY_R},
-		{ 0.0, 49.0,  0.0, WITHOUT_A_C,    REAL,  ONE_ROOT,       0.0,   EMPTY_R},
-		{ 1.0,  0.0, -9.0,   WITHOUT_B,    REAL, TWO_ROOTS,       3.0,      -3.0},
-		{ 1.0,  0.0,  9.0,   WITHOUT_B, COMPLEX,  TWO_COMP, COMPLEX_R, COMPLEX_R},
+		{5.48, 6.48,  0.0,     WITHOUT_C,         REAL,		 TWO_ROOTS,        0,   -1.18248},
+		{1.0 ,  0.0,  0.0,   WITHOUT_B_C,         REAL,		  ONE_ROOT,        0,    EMPTY_X},
+		{48.8, 58.2,  1.0,          FULL,         REAL,		 TWO_ROOTS, -1.17519, -0.0174371},
+		{-7.0, 49.0,  1.0,          FULL,         REAL,		 TWO_ROOTS, -0.020349,    7.0203},
+		{ 0.0, 49.0,  1.0,     WITHOUT_A,		  REAL,		  ONE_ROOT, -0.020408,   EMPTY_X},
+		{ 0.0, 49.0,  0.0,   WITHOUT_A_C,         REAL,		  ONE_ROOT,       0.0,   EMPTY_X},
+		{ 1.0,  0.0, -9.0,     WITHOUT_B,         REAL,		 TWO_ROOTS,       3.0,      -3.0},
+		{ 1.0,  0.0,  9.0,     WITHOUT_B,      COMPLEX,		  TWO_COMP, COMPLEX_X, COMPLEX_X},
+		{ 0.0,  0.0,  0.0,   WITHOUT_ALL,		  REAL,		  ONE_ROOT,  INFINITY,   EMPTY_X},
+		{ 0.0,  0.0,  9.0, NO_ROOTS_TYPE,  NO_ROOTS_IS,		NO_ROOTS_R,   EMPTY_X,   EMPTY_X},
 	};
 
-	for (size_t ind = 0; ind < 8; ind++) {
-		init_test(input, output, checkers[ind][0], checkers[ind][1], checkers[ind][2], checkers[ind][3], 
-			checkers[ind][4], checkers[ind][5], checkers[ind][6], checkers[ind][7]);
+	for (size_t i = 0; i < TEST_COUNT; i++) {
+
+		init_test(input, output, checkers[i][0], checkers[i][1], checkers[i][2], checkers[i][3], 
+			checkers[i][4], checkers[i][5], checkers[i][6], checkers[i][7]);
+
 		solve_eq(output);
+
 		if (check_ans(input, output)) {
 			printf("Ответы совпали\n");
 			correct_ans++;
 		}
+
 		else {
 			printf("Ответы НЕ совпали\n");
 		}
 
 	}
+
 	switch (correct_ans)
 	{
-	case 8:
+	case TEST_COUNT:
+
 		printf("\nAll tests completed successfully\n");
+
 		break;
+
 	default:
+
 		printf("\nCompleted successfully %d tests.\n",correct_ans);
+
 		break;
 	}
 
