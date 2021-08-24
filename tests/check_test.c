@@ -142,5 +142,4 @@ void start_test(struct Equation* input, struct Equation* output) {
 
 		break;
 	}
-
 }
