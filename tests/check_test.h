@@ -5,9 +5,12 @@
 
 #define TEST_COUNT 10
 
-#define TEST_ARGS 8
+#define TEST_ARGS 10
 
-void init_test(struct Equation* inp, struct Equation* out, float a, float b, float c, int type, int is_complex, int root, float x1, float x2);
+void init_test(struct Equation* inp, struct Equation* out,
+               float a, float b, float c,
+               int type, int roots_type, int root,
+               float x1, float x2);
 
 int check_ans(struct Equation* inp, struct Equation* out);
 
