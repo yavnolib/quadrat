@@ -5,7 +5,6 @@
 #include <math.h>
 #include <assert.h>
 
-
 //======================================================================
 int is_equali(int a, int b) {
 
@@ -18,20 +17,23 @@ int is_equali(int a, int b) {
     }
 }
 
-//======================================================================
-int is_equalf(float a, float b) {
-
-    float first = roundf(a * 100.0) / 100.0;
-    float second = roundf(b * 100.0) / 100.0;
-
-    if (first == second)
-        return 1;
-    else
-        return 0;
+//=====================================================================
+void clear_input() {
+    fseek(stdin, 0, SEEK_END);
 }
 
 //======================================================================
-void equation_initialize(struct Equation* eq) {
+int is_equalf(float a, float b) { // 
+
+    if ( ( fabs(a-b) < EPSILON ) || ( (a == INFINITY) && (b == INFINITY) ) )
+        return 1;
+    else
+        return 0;
+
+}
+
+//======================================================================
+void equation_initialize(struct Equation* eq, int except) {
     assert(eq != NULL);
 
     eq->a = NAN;
@@ -40,8 +42,10 @@ void equation_initialize(struct Equation* eq) {
     eq->x1 = NAN;
     eq->x2 = NAN;
     eq->type = 0;
-    eq->is_complex = 0;
-    eq->root = 0;
+    eq->roots_type = 0;
+    eq->root_cnt = 0; 
+    eq->imaginary_part = NAN;
+    eq->real_part = NAN;
 
 }
 
@@ -50,18 +54,18 @@ void equation_input(struct Equation* eq) {
     assert(eq != NULL);
 
     char answer = 0;
-    int got = 0;
+    int status = 0;
 
     do {
-        printf("Введите коэффициенты квадратного уравнения ax^2+bx+c=0 в соответствующем порядке.\n Дробную часть отделите запятой. \n");
+        printf("Please enter quadratic equation's coefficients:\n");
         
-        got = scanf( "%f %f %f", &(eq->a), &(eq->b), &(eq->c) );
-        fseek(stdin, 0, SEEK_END);
+        status = scanf( "%f %f %f", &(eq->a), &(eq->b), &(eq->c) );
+        clear_input();
 
-        if ( got != 3 )
+        if ( status != 3 )
             fprintf(stderr, "\n\t\tWrong input\n\n");
 
-    } while (got != 3);
+    } while (status != 3);
     
     assert(isfinite(eq->a));
     assert(isfinite(eq->b));
@@ -114,7 +118,7 @@ void get_eq_type(struct Equation* eq) {
 void print_eq_form(struct Equation* eq) {
     assert(eq != NULL);
 
-    printf("\nВведённое уравнение: ");
+    printf("Your equation:\n ");
  
     switch (eq->type)
     {
@@ -136,7 +140,7 @@ void print_eq_form(struct Equation* eq) {
 
     case WITHOUT_B:
 
-        if((eq->c)>0)
+        if((eq->c) > 0)
             printf("%.2f * x^2 + %.2f = 0\n", eq->a, eq->c);
         else
             printf("%.2f * x^2 - %.2f = 0\n", eq->a, fabs(eq->c));
@@ -235,6 +239,11 @@ void solve_eq(struct Equation* eq) {
     float c = eq->c;
 
     float D = b * b - 4 * a * c;
+    float D_abs_sqrt = sqrtf(fabs(D));
+    float sqrt_d = sqrtf(D);
+
+    assert(!((a == INFINITY) && (b == INFINITY))); // D_OVERFLOW
+
     float x1 = 0.0;
     float x2 = 0.0;
 
@@ -242,8 +251,8 @@ void solve_eq(struct Equation* eq) {
     {
     case WITHOUT_A:
 
-        eq->is_complex = REAL;
-        eq->root = ONE_ROOT;
+        eq->roots_type = REAL;
+        eq->root_cnt = ONE_ROOT;
         eq->x1 = (-1.0 * c) / b;
         eq->x2 = EMPTY_X;
 
@@ -251,8 +260,8 @@ void solve_eq(struct Equation* eq) {
 
     case WITHOUT_A_C:
 
-        eq->is_complex = REAL;
-        eq->root = ONE_ROOT;
+        eq->roots_type = REAL;
+        eq->root_cnt = ONE_ROOT;
         eq->x1 = 0;
         eq->x2 = EMPTY_X;
 
@@ -260,26 +269,34 @@ void solve_eq(struct Equation* eq) {
 
     case WITHOUT_B:
 
-        if (D > FLT_MIN) {
-            eq->is_complex = REAL;
-            eq->root = TWO_ROOTS;
-            eq->x1 = sqrtf(fabs(c) / fabs(a));
-            eq->x2 = -1.0 * sqrtf(fabs(c) / fabs(a));
+        if (D > FLT_MIN) { 
+            eq->roots_type = REAL;
+            eq->root_cnt = TWO_ROOTS;
+
+            float sqrt = sqrtf(fabs(c) / fabs(a));
+            eq->x1 = sqrt;
+            eq->x2 = -1.0 * sqrt;
         }
 
         else {
-            eq->is_complex = COMPLEX;
-            eq->root = TWO_COMP;
+            /*
+            x = +-i*sqrt( |c|/|a| )
+            */
+            eq->roots_type = COMPLEX;
+            eq->root_cnt = TWO_COMP;
             eq->x1 = COMPLEX_X;
             eq->x2 = COMPLEX_X;
+            eq->real_part = 0.0;
+            eq->imaginary_part = sqrtf(fabs(eq->c) / fabs(eq->a));
+            
         }
 
         break;
 
     case WITHOUT_B_C:
 
-        eq->is_complex = REAL;
-        eq->root = ONE_ROOT;
+        eq->roots_type = REAL;
+        eq->root_cnt = ONE_ROOT;
         eq->x1 = 0;
         eq->x2 = EMPTY_X;
 
@@ -287,8 +304,8 @@ void solve_eq(struct Equation* eq) {
 
     case WITHOUT_C:
 
-        eq->is_complex = REAL;
-        eq->root = TWO_ROOTS;
+        eq->roots_type = REAL;
+        eq->root_cnt = TWO_ROOTS;
         eq->x1 = 0;
         eq->x2 = (-1.0 * b) / a;
 
@@ -296,12 +313,18 @@ void solve_eq(struct Equation* eq) {
 
     case FULL:
 
-        if (D > FLT_MIN) {
-            eq->is_complex = REAL;
-            eq->root = TWO_ROOTS;
+        if (is_equalf(D, 0)) {
+            eq->roots_type = REAL;
+            eq->root_cnt = ONE_ROOT;
+            eq->x1 = (-1.0 * b) / (2.0 * a);
+            eq->x2 = EMPTY_X;
+        }
+        else if (D > 0) {
+            eq->roots_type = REAL;
+            eq->root_cnt = TWO_ROOTS;
             
-            x1 = ((-1.0 * b) - sqrt(D)) / (2.0 * a);
-            x2 = ((-1.0 * b) + sqrt(D)) / (2.0 * a);
+            x1 = ((-1.0 * b) - sqrt_d) / (2.0 * a);
+            x2 = ((-1.0 * b) + sqrt_d) / (2.0 * a);
 
             if (x1 < x2) {
                 eq->x1 = x1;
@@ -313,26 +336,22 @@ void solve_eq(struct Equation* eq) {
             }
         }
 
-        else if (D < (-1.0* FLT_MIN) ) {
-            eq->is_complex = COMPLEX;
-            eq->root = TWO_COMP;
+        else if (D < 0) {
+            eq->roots_type = COMPLEX;
+            eq->root_cnt = TWO_COMP;
             eq->x1 = COMPLEX_X;
             eq->x2 = COMPLEX_X;
-        }
-
-        else {
-            eq->is_complex = REAL;
-            eq->root = ONE_ROOT;
-            eq->x1 = (-1.0 * b) / (2.0 * a);
-            eq->x2 = EMPTY_X;
+            eq->real_part = (-1.0 * b) / (2.0 * a);
+            eq->imaginary_part = D_abs_sqrt / (2.0 * a);
+            
         }
 
         break;
 
     case WITHOUT_ALL:
 
-        eq->is_complex = REAL;
-        eq->root = ONE_ROOT;
+        eq->roots_type = REAL;
+        eq->root_cnt = ONE_ROOT;
         eq->x1 = INFINITY;
         eq->x2 = EMPTY_X;
 
@@ -340,8 +359,8 @@ void solve_eq(struct Equation* eq) {
 
     case NO_ROOTS_TYPE:
 
-        eq->is_complex = NO_ROOTS_IS;
-        eq->root = NO_ROOTS_R;
+        eq->roots_type = NO_ROOTS_IS;
+        eq->root_cnt = NO_ROOTS_R;
         eq->x1 = EMPTY_X;
         eq->x2 = EMPTY_X;
 
@@ -359,16 +378,14 @@ void solve_eq(struct Equation* eq) {
 void print_complex_solution(struct Equation* eq) {
     assert(eq != NULL);
 
-    float D_sqrt = sqrtf(fabs((eq->b) * (eq->b) - 4.0 * (eq->a) * (eq->c)));
-
     switch (eq->type)
     {
     case WITHOUT_B:
         /*
             x = +-i*sqrt( |c|/|a| )
         */
-        printf("\nУравнение имеет решения только в комплексных числах.\nОтвет: ");
-        printf("x = +-%.2f*i",sqrtf(fabs(eq->c)/fabs(eq->a)));
+        printf("\nThe equation has solutions only in complex numbers.\nAnswer: ");
+        printf("x = +-%.3f*i",eq->imaginary_part);
 
         break;
 
@@ -377,9 +394,16 @@ void print_complex_solution(struct Equation* eq) {
                     D<0 => x1 = ( -b - i*sqrt(|D|) )/2a
                            x2 = ( -b + i*sqrt(|D|) )/2a
         */
-        printf("\nДискриминант меньше нуля.\nУравнение имеет решения только в комплексных числах.\nОтвет: ");
-        printf("x = (%.2f - %.2f*i)/%.2f ; ", -1.0 * (eq->b), D_sqrt, (eq->a) * 2.0);
-        printf("x = (%.2f + %.2f*i)/%.2f ; ", -1.0 * (eq->b), D_sqrt, (eq->a) * 2.0);
+        printf("\nDiscriminant less than zero.\nThe equation has solutions only in complex numbers.\nAnswer: ");
+        
+        if (eq->a > 0) {
+            printf("x = %.2f + %.2f*i ; ", eq->real_part, eq->imaginary_part);
+            printf("x = %.2f - %.2f*i\n", eq->real_part, eq->imaginary_part);
+        }
+        else {
+            printf("x = %.2f + %.2f*i ; ", eq->real_part, -1.0 * eq->imaginary_part);
+            printf("x = %.2f - %.2f*i\n", eq->real_part, -1.0 * eq->imaginary_part);
+        }
 
         break;
 
@@ -395,27 +419,27 @@ void print_complex_solution(struct Equation* eq) {
 void print_roots(struct Equation* eq) {
     assert(eq != NULL);
 
-    if ((eq->is_complex) == COMPLEX)
+    if ((eq->roots_type) == COMPLEX)
         print_complex_solution(eq);
 
     else {
-        switch (eq->root)
+        switch (eq->root_cnt)
         {
         case ONE_ROOT:
 
-            printf("\nОтвет: x = %.2f", eq->x1);
+            printf("\nAnswer: x = %.2f", eq->x1);
 
             break;
 
         case TWO_ROOTS:
 
-            printf("\nОтвет: x = %.2f ; x = %.2f", eq->x1, eq->x2);
+            printf("\nAnswer: x = %.2f ; x = %.2f", eq->x1, eq->x2);
 
             break;
 
         case NO_ROOTS_R:
 
-            printf("\nНет решений");
+            printf("\nNo solutions");
 
             break;
 
@@ -434,16 +458,16 @@ void enter_equation(struct Equation* eq) {
     
     equation_input(eq);
     get_eq_type(eq);
-    print_eq_form(eq);
+    print_eq_form(eq); // return values if error 
 }
 
 //======================================================================
 int want_again() {
     char y_or_n = 0;
 
-    printf("\nХотите ввести еще одно уравнение? y/n: ");
+    printf("\nWant to introduce another equation? y/n: ");
     scanf("%c", &y_or_n);
-    fseek(stdin, 0, SEEK_END);
+    clear_input();
 
     if ((y_or_n == 'y') || (y_or_n == 'Y')) {
         return 1;
@@ -452,7 +476,7 @@ int want_again() {
         return 0;
     }
     else {
-        printf("\nВведите y , чтобы продолжить или n , чтобы прекратить выполнение программы");
+        printf("\nEnter y to continue or n to terminate the program");
         want_again();
     }
 }
