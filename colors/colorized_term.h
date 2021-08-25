@@ -1,5 +1,6 @@
 #pragma once
 #include <stdio.h>
+//  printf(ANSI_COLOR_RED     "This text is RED!"     ANSI_COLOR_RESET "\n");
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 
