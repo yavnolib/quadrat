@@ -81,132 +81,87 @@ void get_eq_type(struct Equation* eq) {
     float c = eq->c;
 
     if (is_equalf(a, 0) && is_equalf(b, 0) && is_equalf(c,0) ) {
+        eq->bin_type = 0;         // WITHOUT ALL  0
         eq->type = WITHOUT_ALL;
     }
 
     else if (is_equalf(b,0)) {          // ax^2+c   или ax^2 или c=0 (если а=0)
 
-        if (is_equalf(c, 0))
+        if (is_equalf(c, 0)) {
+            set_bit(&(eq->bin_type), 3);  // WITHOUT_B_C = 100
             eq->type = WITHOUT_B_C;
+        }
 
-        else if (is_equalf(a, 0))
+        else if (is_equalf(a, 0)) {
+            set_bit(&(eq->bin_type), 1);  // NO_ROOTS_TYPE = 001
             eq->type = NO_ROOTS_TYPE;
+        }
 
-        else
+        else {
+            set_bit(&(eq->bin_type), 1);     // WITHOUT_B = 101
+            set_bit(&(eq->bin_type), 3);
             eq->type = WITHOUT_B;
-
+        }
     }
 
     else if (is_equalf(c, 0)) {    // ax^2+bx=0    bx=0    
 
-        if (is_equalf(a, 0))
+        if (is_equalf(a, 0)) {
+            set_bit(&(eq->bin_type), 2);     //WITHOUT_A_C = 010
             eq->type = WITHOUT_A_C;
+        }
 
-        else
+        else {
+            set_bit(&(eq->bin_type), 3);   // WITHOUT_C = 110
+            set_bit(&(eq->bin_type), 2);
             eq->type = WITHOUT_C;
+        }
     }
 
     else if (is_equalf(a, 0)) {
+        set_bit(&(eq->bin_type), 1);         // WITHOUT_A = 011
+        set_bit(&(eq->bin_type), 2);
         eq->type = WITHOUT_A;
     }
 
-    else
+    else {
+        set_bit(&(eq->bin_type), 1);             //FULL = 111
+        set_bit(&(eq->bin_type), 2);
+        set_bit(&(eq->bin_type), 3);
         eq->type = FULL;
+    }
+
 }
 
 //======================================================================
 void print_eq_form(struct Equation* eq) {
     assert(eq != NULL);
-
-    printf("Your equation:\n ");
- 
-    switch (eq->type)
-    {
-
-    case WITHOUT_A:
-
-        if((eq->c)>0)
-            printf("%.2f * x + %.2f = 0\n", eq->b, eq->c);
-        else
-            printf("%.2f * x - %.2f = 0\n", eq->b, fabs(eq->c));
-
-        break;
-
-    case WITHOUT_A_C:
-
-        printf("%.2f * x = 0\n", eq->b);
-
-        break;
-
-    case WITHOUT_B:
-
-        if((eq->c) > 0)
-            printf("%.2f * x^2 + %.2f = 0\n", eq->a, eq->c);
-        else
-            printf("%.2f * x^2 - %.2f = 0\n", eq->a, fabs(eq->c));
-
-        break;
-
-    case WITHOUT_B_C:
-
-        printf("%.2f * x^2 = 0\n", eq->a);
-
-        break;
-
-    case WITHOUT_C:
-
-        if((eq->b)>0)
-            printf("%.2f * x^2 + %.2f * x = 0\n", eq->a, eq->b);
-        else
-            printf("%.2f * x^2 - %.2f * x = 0\n", eq->a, fabs(eq->b));
-
-        break;
-
-    case FULL:
-
-        if ((eq->b) > 0) {
-
-            if ((eq->c) > 0) {
-                printf("%.2f * x^2 + %.2f * x + %.2f = 0\n", eq->a, eq->b, eq->c);
-            }
-
-            else {
-                printf("%.2f * x^2 + %.2f * x - %.2f = 0\n", eq->a, eq->b, fabs(eq->c));
-            }
-
-        }
-        else {
-
-            if ((eq->c) > 0) {
-                printf("%.2f * x^2 - %.2f * x + %.2f = 0\n", eq->a, fabs(eq->b), eq->c);
-            }
-
-            else {
-                printf("%.2f * x^2 - %.2f * x - %.2f = 0\n", eq->a, fabs(eq->b), fabs(eq->c));
-            }
-
-        }
-
-        break;
-
-    case WITHOUT_ALL:
-
+    // WITHOUT ALL  0                   0 = 0
+    // WITHOUT_B_C = 100                ax^2 = 0
+    // NO_ROOTS_TYPE = 001              c = 0
+    // WITHOUT_B = 101                  ax^2+c = 0
+    // WITHOUT_A_C = 010                bx = 0
+    // WITHOUT_C = 110                  ax^2+bx = 0
+    // WITHOUT_A = 011                  bx+c = 0
+    // FULL = 111                       ax^2+bx+c = 0
+    printf("\nEntered coefficients:\n");
+    
+    if ( (!get_bit(eq->bin_type, 3)) && (!get_bit(eq->bin_type, 2)) && (!get_bit(eq->bin_type, 1)) )
         printf("0 = 0\n");
 
-        break;
-
-    case NO_ROOTS_TYPE:
-
-        printf("%.2f = 0\n", eq->c);
-
-        break;
-
-    default:
-
-        fprintf(stderr, "\n\t\tUNKNOWN ERROR\n\n");
-
-        break;
+    else {
+        if (get_bit(eq->bin_type, 3)) {
+            printf("a = %.2f\n", eq->a);
+        }
+        if (get_bit(eq->bin_type, 2)) {
+            printf("b = %.2f\n", eq->b);
+        }
+        if (get_bit(eq->bin_type, 1)) {
+            printf("c = %.2f\n", eq->c);
+        }
     }
+    printf("\n");
+    
 }
 
 
@@ -479,4 +434,39 @@ int want_again() {
         printf("\nEnter y to continue or n to terminate the program");
         want_again();
     }
+}
+
+//=======================================================================
+void set_bit(int* eq_type, int pos) {
+    int bit = 1;
+    pos -= 1;
+    bit = bit << pos;
+    *eq_type = *eq_type | bit;
+}
+
+//======================================================================
+int get_bit(int eq_type, int pos) {
+    switch (pos)
+    {
+    case 1:
+        return (eq_type & 1) ? 1 : 0;
+        break;
+
+    case 2:
+        return (eq_type & 2) ? 1 : 0;
+        break;
+
+    case 3:
+        return (eq_type & 4) ? 1 : 0;
+        break;
+
+    default:
+        return -1;
+        break;
+    }
+}
+
+//=======================================================================
+int is_positive(float a) {
+    return (a > 0) ? 1 : 0;
 }
