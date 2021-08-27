@@ -20,6 +20,7 @@ struct Equation {
     int type; /*!< Type of equation. */
     int roots_type; /*!< Root type. */
     int root_cnt; /*!< Number of roots. */
+    int bin_type; /*!< Bit mask of type. */
 };
 
 //! \enum x_type "equation.h"
@@ -106,3 +107,12 @@ int is_equali(int a, int b);
 
 //! A function for clear input
 void clear_input();
+
+//! A function for set 1 in bit with number Pos
+void set_bit(int* eq_type, int pos);
+
+//! A function for get bit
+int get_bit(int eq_type, int pos);
+
+//! Is it positive or negative?
+int is_positive(float a);
