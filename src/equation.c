@@ -1,9 +1,9 @@
 #include <stdio.h>
-#include "equation.h"
-#include "float.h"
+#include <float.h>
 #include <limits.h>
 #include <math.h>
 #include <assert.h>
+#include "equation.h"
 
 //======================================================================
 int is_equali(int a, int b) {
