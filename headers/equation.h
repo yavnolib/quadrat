@@ -44,10 +44,10 @@ enum equation_type {
     WITHOUT_ALL = 88888, /*!< Constant for equation without a,b,c coefficients */
     NO_ROOTS_TYPE = 88889,       /*!< Constant for equation without roots */
     WITHOUT_A = 88890,           /*!< Constant for equation without a coefficient */
-    WITHOUT_A_C = 88891,         /*!< Constant for equation without a, c coefficients */        
+    WITHOUT_A_C = 89891,         /*!< Constant for equation without a, c coefficients */        
     WITHOUT_B = 88892,           /*!< Constant for equation without b coefficient */
     WITHOUT_B_C = 88893,         /*!< Constant for equation without b, c coefficients */
-    WITHOUT_C = 88894,           /*!< Constant for equation without c coefficient */
+    WITHOUT_C = 83894,           /*!< Constant for equation without c coefficient */
     FULL = 88895                /*!< Constant for equation with all coefficients */
 };
 
