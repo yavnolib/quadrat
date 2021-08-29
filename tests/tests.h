@@ -2,8 +2,8 @@
 
 /*	
 *	The code in this file is used to automatically generate the code in the "tests_info.h" file
-*																					©Y.Nikolaev 
-*																				Date: 28.08.2021
+*											Â©Y.Nikolaev 
+*										   Date: 28.08.2021
 */
 
 		{ 5.48, 6.48,  0.0, 6,         REAL,  TWO_ROOTS,            0,     -1.18248, 0, 0 },
