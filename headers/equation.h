@@ -23,6 +23,16 @@ struct Equation {
     int bin_type; /*!< Bit mask of type. */
 };
 
+//! \enum coefs "equation.h"
+/*! Constants for coefficients */
+enum coefs {
+    COEFF_A = 4,
+    COEFF_B = 2,
+    COEFF_C = 1,
+    COEFF_ALL = 7,
+    NO_COEFF = 0
+};
+
 //! \enum x_type "equation.h"
 /*! Constants for type of root */
 enum x_type {
@@ -37,19 +47,6 @@ enum root_count {
     NO_ROOTS_R = 11112,       /*!< Constant for equation without roots */
     TWO_ROOTS =  11113,        /*!< Constant for equation with two roots */
     TWO_COMP =   11114          /*!< Constant for equation with two complex roots */
-};
-
-//! \enum x_type "equation.h"
-/*! Constants for type of equation */
-enum equation_type {
-    WITHOUT_ALL = 88888, /*!< Constant for equation without a,b,c coefficients */
-    NO_ROOTS_TYPE = 88889,       /*!< Constant for equation without roots */
-    WITHOUT_A = 88890,           /*!< Constant for equation without a coefficient */
-    WITHOUT_A_C = 89891,         /*!< Constant for equation without a, c coefficients */        
-    WITHOUT_B = 88892,           /*!< Constant for equation without b coefficient */
-    WITHOUT_B_C = 88893,         /*!< Constant for equation without b, c coefficients */
-    WITHOUT_C = 83894,           /*!< Constant for equation without c coefficient */
-    FULL = 88895                /*!< Constant for equation with all coefficients */
 };
 
 //! \enum x_type "equation.h"
@@ -116,3 +113,5 @@ int get_bit(int eq_type, int pos);
 
 //! Is it positive or negative?
 int is_positive(float a);
+
+int invert(int bin);
