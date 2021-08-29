@@ -7,23 +7,18 @@
 
 //======================================================================
 int is_equali(int a, int b) {
+    return (a == b) ? 1 : 0;
 
-    if (a == b) {
-        return 1;
-    }
-
-    else {
-        return 0;
-    }
 }
 
 //=====================================================================
 void clear_input() {
     fseek(stdin, 0, SEEK_END);
+
 }
 
 //======================================================================
-int is_equalf(float a, float b) { // 
+int is_equalf(float a, float b) { 
 
     if ( ( fabs(a-b) < EPSILON ) || ( (a == INFINITY) && (b == INFINITY) ) )
         return 1;
@@ -41,7 +36,8 @@ void equation_initialize(struct Equation* eq, int except) {
     eq->c = NAN;
     eq->x1 = NAN;
     eq->x2 = NAN;
-    eq->type = 0;
+
+    eq->bin_type = 0;
     eq->roots_type = 0;
     eq->root_cnt = 0; 
     eq->imaginary_part = NAN;
@@ -80,86 +76,41 @@ void get_eq_type(struct Equation* eq) {
     float b = eq->b;
     float c = eq->c;
 
-    if (is_equalf(a, 0) && is_equalf(b, 0) && is_equalf(c,0) ) {
-        eq->bin_type = 0;         // WITHOUT ALL  0
-        eq->type = WITHOUT_ALL;
-    }
+    eq->bin_type = COEFF_ALL;
 
-    else if (is_equalf(b,0)) {          // ax^2+c   или ax^2 или c=0 (если а=0)
-
-        if (is_equalf(c, 0)) {
-            set_bit(&(eq->bin_type), 3);  // WITHOUT_B_C = 100
-            eq->type = WITHOUT_B_C;
-        }
-
-        else if (is_equalf(a, 0)) {
-            set_bit(&(eq->bin_type), 1);  // NO_ROOTS_TYPE = 001
-            eq->type = NO_ROOTS_TYPE;
-        }
-
-        else {
-            set_bit(&(eq->bin_type), 1);     // WITHOUT_B = 101
-            set_bit(&(eq->bin_type), 3);
-            eq->type = WITHOUT_B;
-        }
-    }
-
-    else if (is_equalf(c, 0)) {    // ax^2+bx=0    bx=0    
-
-        if (is_equalf(a, 0)) {
-            set_bit(&(eq->bin_type), 2);     //WITHOUT_A_C = 010
-            eq->type = WITHOUT_A_C;
-        }
-
-        else {
-            set_bit(&(eq->bin_type), 3);   // WITHOUT_C = 110
-            set_bit(&(eq->bin_type), 2);
-            eq->type = WITHOUT_C;
-        }
-    }
-
-    else if (is_equalf(a, 0)) {
-        set_bit(&(eq->bin_type), 1);         // WITHOUT_A = 011
-        set_bit(&(eq->bin_type), 2);
-        eq->type = WITHOUT_A;
-    }
-
-    else {
-        set_bit(&(eq->bin_type), 1);             //FULL = 111
-        set_bit(&(eq->bin_type), 2);
-        set_bit(&(eq->bin_type), 3);
-        eq->type = FULL;
-    }
-
+    if (is_equalf(a, 0)) eq->bin_type &= ~COEFF_A;    //  00000111 11111011 000000011
+    if (is_equalf(b, 0)) eq->bin_type &= ~COEFF_B;
+    if (is_equalf(c, 0)) eq->bin_type &= ~COEFF_C;
 }
 
 //======================================================================
 void print_eq_form(struct Equation* eq) {
     assert(eq != NULL);
     // WITHOUT ALL  0                   0 = 0
-    // WITHOUT_B_C = 100                ax^2 = 0
-    // NO_ROOTS_TYPE = 001              c = 0
-    // WITHOUT_B = 101                  ax^2+c = 0
-    // WITHOUT_A_C = 010                bx = 0
-    // WITHOUT_C = 110                  ax^2+bx = 0
-    // WITHOUT_A = 011                  bx+c = 0
-    // FULL = 111                       ax^2+bx+c = 0
+    // 4 = 100                ax^2 = 0
+    // 1 = 001              c = 0
+    // 5 = 101                  ax^2+c = 0
+    // 2 = 010                bx = 0
+    // 6 = 110                  ax^2+bx = 0
+    // 3 = 011                  bx+c = 0
+    // 7 = 111                       ax^2+bx+c = 0
     printf("\nEntered coefficients:\n");
     
-    if ( (!get_bit(eq->bin_type, 3)) && (!get_bit(eq->bin_type, 2)) && (!get_bit(eq->bin_type, 1)) )
+    if ( eq->bin_type == NO_COEFF ) // a = 0, b = 0, c = 0
         printf("0 = 0\n");
 
     else {
-        if (get_bit(eq->bin_type, 3)) {
+        if (eq->bin_type & COEFF_A) {
             printf("a = %.2f\n", eq->a);
         }
-        if (get_bit(eq->bin_type, 2)) {
+        if (eq->bin_type & COEFF_B) {
             printf("b = %.2f\n", eq->b);
         }
-        if (get_bit(eq->bin_type, 1)) {
+        if (eq->bin_type & COEFF_C) {
             printf("c = %.2f\n", eq->c);
         }
     }
+
     printf("\n");
     
 }
@@ -170,7 +121,7 @@ void solve_eq(struct Equation* eq) {
     assert(eq != NULL);
     /*
         одна буква х
-        (01*) bx+c=0        //WITHOUT_A           x=-c/b ONE_ROOT
+        (01*) bx+c=0        //3           x=-c/b ONE_ROOT
         (02*) bx=0          // WITHOUT A_C        x=0
         (1*) ax^2=0 => x=0  // WITHOUT B_C        x=0
         (2*) ax^2+c=0 =>    // WITHOUT B          
@@ -180,7 +131,7 @@ void solve_eq(struct Equation* eq) {
                             x = +-i*sqrt( |c|/|a| )
         две буквы х
         (3*) ax^2+bx=0 => x(ax+b)=0 => x=0, x=-b/a WITHOUT C
-        (4*) ax^2+bx+c=0 => FULL
+        (4*) ax^2+bx+c=0 => 7
             D=b^2-4*a*c
             switch(D):
                 D=0 => x=-b/2a
@@ -202,35 +153,67 @@ void solve_eq(struct Equation* eq) {
     float x1 = 0.0;
     float x2 = 0.0;
 
-    switch (eq->type)
-    {
-    case WITHOUT_A:
-
+    if (!(eq->bin_type & COEFF_ALL)) {              // W/O ALL
         eq->roots_type = REAL;
         eq->root_cnt = ONE_ROOT;
-        eq->x1 = (-1.0 * c) / b;
+        eq->x1 = INFINITY;
         eq->x2 = EMPTY_X;
+        return;
 
-        break;
+    }
 
-    case WITHOUT_A_C:
+    if ((eq->bin_type & (COEFF_A | COEFF_B)) == 0) {      // W/o AB
+
+        eq->roots_type = NO_ROOTS_IS;
+        eq->root_cnt = NO_ROOTS_R;
+        eq->x1 = EMPTY_X;
+        eq->x2 = EMPTY_X;
+        return;
+
+    }
+
+    if ((eq->bin_type & (COEFF_B | COEFF_C)) == 0) {  // W/O BC
 
         eq->roots_type = REAL;
         eq->root_cnt = ONE_ROOT;
         eq->x1 = 0;
         eq->x2 = EMPTY_X;
+        return;
 
-        break;
+    }
 
-    case WITHOUT_B:
+    if ((eq->bin_type & (COEFF_A | COEFF_C)) == 0)  //    W/O AC
+    {
+        eq->roots_type = REAL;
+        eq->root_cnt = ONE_ROOT;
+        eq->x1 = 0;
+        eq->x2 = EMPTY_X;
 
-        if (D > FLT_MIN) { 
+        return;
+    }
+
+    if (!(eq->bin_type & COEFF_A)) //WITHOUT A
+    {
+        eq->roots_type = REAL;
+        eq->root_cnt = ONE_ROOT;
+        eq->x1 = (-1.0 * c) / b;
+        eq->x2 = EMPTY_X;
+
+        return;
+    }
+     
+
+    if ((!(eq->bin_type & COEFF_B))) { // WITHOUT B
+
+        if (D > FLT_MIN) {
             eq->roots_type = REAL;
             eq->root_cnt = TWO_ROOTS;
 
             float sqrt = sqrtf(fabs(c) / fabs(a));
             eq->x1 = sqrt;
             eq->x2 = -1.0 * sqrt;
+            return;
+
         }
 
         else {
@@ -243,41 +226,36 @@ void solve_eq(struct Equation* eq) {
             eq->x2 = COMPLEX_X;
             eq->real_part = 0.0;
             eq->imaginary_part = sqrtf(fabs(eq->c) / fabs(eq->a));
-            
+            return;
+
         }
 
-        break;
+    }
 
-    case WITHOUT_B_C:
-
-        eq->roots_type = REAL;
-        eq->root_cnt = ONE_ROOT;
-        eq->x1 = 0;
-        eq->x2 = EMPTY_X;
-
-        break;
-
-    case WITHOUT_C:
+    if ((!(eq->bin_type & COEFF_C))) {          //  W/O C
 
         eq->roots_type = REAL;
         eq->root_cnt = TWO_ROOTS;
         eq->x1 = 0;
         eq->x2 = (-1.0 * b) / a;
+        return;
 
-        break;
+    }
 
-    case FULL:
+    if (eq->bin_type == COEFF_ALL) {            // 7
 
         if (is_equalf(D, 0)) {
             eq->roots_type = REAL;
             eq->root_cnt = ONE_ROOT;
             eq->x1 = (-1.0 * b) / (2.0 * a);
             eq->x2 = EMPTY_X;
+            return;
+
         }
         else if (D > 0) {
             eq->roots_type = REAL;
             eq->root_cnt = TWO_ROOTS;
-            
+
             x1 = ((-1.0 * b) - sqrt_d) / (2.0 * a);
             x2 = ((-1.0 * b) + sqrt_d) / (2.0 * a);
 
@@ -289,6 +267,8 @@ void solve_eq(struct Equation* eq) {
                 eq->x1 = x2;
                 eq->x2 = x1;
             }
+            return;
+
         }
 
         else if (D < 0) {
@@ -298,59 +278,38 @@ void solve_eq(struct Equation* eq) {
             eq->x2 = COMPLEX_X;
             eq->real_part = (-1.0 * b) / (2.0 * a);
             eq->imaginary_part = D_abs_sqrt / (2.0 * a);
-            
+            return;
+
         }
 
-        break;
-
-    case WITHOUT_ALL:
-
-        eq->roots_type = REAL;
-        eq->root_cnt = ONE_ROOT;
-        eq->x1 = INFINITY;
-        eq->x2 = EMPTY_X;
-
-        break;
-
-    case NO_ROOTS_TYPE:
-
-        eq->roots_type = NO_ROOTS_IS;
-        eq->root_cnt = NO_ROOTS_R;
-        eq->x1 = EMPTY_X;
-        eq->x2 = EMPTY_X;
-
-        break;
-
-    default:
-
-        fprintf(stderr, "\n\t\tUNKNOWN ERROR\n\n");
-
-        break;
     }
+
+
+    fprintf(stderr, "\n\t\tUNKNOWN ERROR\n\n");
+
 }
 
 //======================================================================
 void print_complex_solution(struct Equation* eq) {
     assert(eq != NULL);
 
-    switch (eq->type)
-    {
-    case WITHOUT_B:
+    if ((!(eq->bin_type & COEFF_B))) {
         /*
             x = +-i*sqrt( |c|/|a| )
         */
         printf("\nThe equation has solutions only in complex numbers.\nAnswer: ");
-        printf("x = +-%.3f*i",eq->imaginary_part);
+        printf("x = +-%.3f*i", eq->imaginary_part);
+        return;
 
-        break;
+    }
 
-    case FULL:
+    if (eq->bin_type == COEFF_ALL) {
         /*
                     D<0 => x1 = ( -b - i*sqrt(|D|) )/2a
                            x2 = ( -b + i*sqrt(|D|) )/2a
         */
         printf("\nDiscriminant less than zero.\nThe equation has solutions only in complex numbers.\nAnswer: ");
-        
+
         if (eq->a > 0) {
             printf("x = %.2f + %.2f*i ; ", eq->real_part, eq->imaginary_part);
             printf("x = %.2f - %.2f*i\n", eq->real_part, eq->imaginary_part);
@@ -360,14 +319,11 @@ void print_complex_solution(struct Equation* eq) {
             printf("x = %.2f - %.2f*i\n", eq->real_part, -1.0 * eq->imaginary_part);
         }
 
-        break;
-
-    default:
-
-        fprintf(stderr, "\n\t\tUNKNOWN ERROR\n\n");
-
-        break;
+        return;
     }
+
+    fprintf(stderr, "\n\t\tUNKNOWN ERROR\n\n");
+
 }
 
 //======================================================================
@@ -461,6 +417,7 @@ int get_bit(int eq_type, int pos) {
         break;
 
     default:
+        printf("\tUNKNOWN ERROR\n");
         return -1;
         break;
     }
@@ -469,4 +426,13 @@ int get_bit(int eq_type, int pos) {
 //=======================================================================
 int is_positive(float a) {
     return (a > 0) ? 1 : 0;
+
+}
+
+//=======================================================================
+int invert(int bin) {
+    int inv_bin = ~bin;                                // 00000100   11111011 & 00000111 = 011
+    inv_bin &= 7;
+    return inv_bin;
+
 }
