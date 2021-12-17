@@ -18,9 +18,9 @@ void clear_input() {
 }
 
 //======================================================================
-int is_equalf(float a, float b) { 
+int is_equalf(float a, float b) {
 
-    if ( ( fabs(a-b) < EPSILON ) || ( (a == INFINITY) && (b == INFINITY) ) )
+    if ((fabs(a - b) < EPSILON) || ((a == INFINITY) && (b == INFINITY)))
         return 1;
     else
         return 0;
@@ -39,7 +39,7 @@ void equation_initialize(struct Equation* eq, int except) {
 
     eq->bin_type = 0;
     eq->roots_type = 0;
-    eq->root_cnt = 0; 
+    eq->root_cnt = 0;
     eq->imaginary_part = NAN;
     eq->real_part = NAN;
 
@@ -54,15 +54,28 @@ void equation_input(struct Equation* eq) {
 
     do {
         printf("Please enter quadratic equation's coefficients:\n");
-        
-        status = scanf( "%f %f %f", &(eq->a), &(eq->b), &(eq->c) );
+
+        status = scanf("%f %f %f", &(eq->a), &(eq->b), &(eq->c));
         clear_input();
 
-        if ( status != 3 )
+        if (status != 3)
             fprintf(stderr, "\n\t\tWrong input\n\n");
 
     } while (status != 3);
-    
+
+    assert(isfinite(eq->a));
+    assert(isfinite(eq->b));
+    assert(isfinite(eq->c));
+}
+
+//======================================================================
+void equation_input_with_args(struct Equation* eq, int a, int b, int c) {
+    assert(eq != NULL);
+
+    eq->a = a;
+    eq->b = b;
+    eq->c = c;
+
     assert(isfinite(eq->a));
     assert(isfinite(eq->b));
     assert(isfinite(eq->c));
@@ -71,7 +84,7 @@ void equation_input(struct Equation* eq) {
 //======================================================================
 void get_eq_type(struct Equation* eq) {
     assert(eq != NULL);
-    
+
     float a = eq->a;
     float b = eq->b;
     float c = eq->c;
@@ -95,8 +108,8 @@ void print_eq_form(struct Equation* eq) {
     // 3 = 011                  bx+c = 0
     // 7 = 111                       ax^2+bx+c = 0
     printf("\nEntered coefficients:\n");
-    
-    if ( eq->bin_type == NO_COEFF ) // a = 0, b = 0, c = 0
+
+    if (eq->bin_type == NO_COEFF) // a = 0, b = 0, c = 0
         printf("0 = 0\n");
 
     else {
@@ -112,7 +125,7 @@ void print_eq_form(struct Equation* eq) {
     }
 
     printf("\n");
-    
+
 }
 
 
@@ -124,7 +137,7 @@ void solve_eq(struct Equation* eq) {
         (01*) bx+c=0        //3           x=-c/b ONE_ROOT
         (02*) bx=0          // WITHOUT A_C        x=0
         (1*) ax^2=0 => x=0  // WITHOUT B_C        x=0
-        (2*) ax^2+c=0 =>    // WITHOUT B          
+        (2*) ax^2+c=0 =>    // WITHOUT B
                         if (c>0 and a<0) or (c<0 and a>0):
                             x = +-sqrt( |c|/|a| )
                         else
@@ -201,7 +214,7 @@ void solve_eq(struct Equation* eq) {
 
         return;
     }
-     
+
 
     if ((!(eq->bin_type & COEFF_B))) { // WITHOUT B
 
@@ -366,7 +379,7 @@ void print_roots(struct Equation* eq) {
 //======================================================================
 void enter_equation(struct Equation* eq) {
     assert(eq != NULL);
-    
+
     equation_input(eq);
     get_eq_type(eq);
     print_eq_form(eq); // return values if error 
