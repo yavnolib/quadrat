@@ -13,22 +13,30 @@
 #include "check_test.h"
 
 int main(int argc, const char* argv[])
-{   
+{
     printf("# Square equation solver QUADRAT\n\n");
 
     struct Equation test_inp = { 0 };
     struct Equation test_out = { 0 };
-    struct Equation quadro   = { 0 };
-    
+    struct Equation quadro = { 0 };
+
     start_test(&test_inp, &test_out);
-    
+
     do {
-        equation_initialize (&quadro);
-        enter_equation      (&quadro);
-        solve_eq            (&quadro);
-        print_roots         (&quadro);
+        equation_initialize(&quadro);
+        if (argc == 1) {
+            equation_input(&quadro);
+        }
+        else {
+            int a = strtol(argv[1], NULL, 10);
+            int b = strtol(argv[2], NULL, 10);
+            int c = strtol(argv[3], NULL, 10);
+            equation_input_with_args(&quadro);
+        }
+        enter_equation(&quadro);
+        solve_eq(&quadro);
+        print_roots(&quadro);
     } while (want_again());
 
     return 0;
 }
-
