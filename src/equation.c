@@ -380,7 +380,6 @@ void print_roots(struct Equation* eq) {
 void enter_equation(struct Equation* eq) {
     assert(eq != NULL);
 
-    equation_input(eq);
     get_eq_type(eq);
     print_eq_form(eq); // return values if error 
 }
